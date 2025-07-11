@@ -1,0 +1,50 @@
+services:
+  weather-frontend:
+    build:
+      context: ./weather-frontend
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ./weather-frontend/src:/home/node/app/src
+    command: ["npm", "start"]
+    depends_on:
+      - weather-change-aggregator
+
+  weather-change-aggregator:
+    build:
+      context: ./weather-change-aggregator
+      dockerfile: Dockerfile
+    environment:
+      WA_WS_URL: "ws://weather-stream-simulator:8765"
+      WA_HTTP_PORT: 3000
+      WA_HTTP_HOSTNAME: "0.0.0.0"
+      WA_MONGODB_URL: "mongodb://mongo/weather-change-aggregator"
+      WA_LOGGER_LEVEL: "info"
+      WA_SYNC_MS: 20000
+    ports:
+      - 3001:3000
+    command: ["npm", "run", "start:watch"]
+    volumes:
+      - ./weather-change-aggregator/src:/home/node/app/src
+    depends_on:
+      - weather-stream-simulator
+      - mongo
+
+  weather-stream-simulator:
+    build:
+      context: ./weather-stream-simulator
+      dockerfile: Dockerfile
+    command: npm start
+
+  mongo:
+    init: true
+    image: mongo:8-noble
+    ports:
+      - 27017:27017
+    volumes: [ "mongodb:/data/db", "mongodb-config:/data/configdb" ]
+
+volumes:
+  mongodb:
+  mongodb-config:
+

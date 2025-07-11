@@ -1,0 +1,7 @@
+{
+  "delay": 2000,
+  "watchInterval": 2000,
+  "watch": [ "src" ],
+  "ext": "ts",
+  "exec": "tsc --incremental --tsBuildInfoFile tsc.incremental.json && node --use-strict --enable-source-maps --trace-deprecation --trace-warnings dist/src/run.js | pino-pretty -m msg -S"
+}
